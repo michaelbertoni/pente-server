@@ -2,41 +2,53 @@ package fr.epsi.entity;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.tomcat.jni.Local;
 
-import javax.annotation.Generated;
-import javax.persistence.*;
-import java.sql.Timestamp;
-import java.util.HashMap;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Timer;
+import java.util.TreeMap;
 
 /**
  * Created by micha on 10/04/2017.
  */
-@Entity
 @Getter
 @Setter
 public class Game {
 
-    @Id
-    @GeneratedValue
-    private Integer id;
+    private static Game instance = new Game();
 
-    private String token;
+    public static Game getInstance() {
+        return instance;
+    }
 
-    @OneToMany(cascade = CascadeType.ALL)
-    private List<Player> players;
+    private Game() {
+    }
 
-    @ManyToOne
+    private Player player1;
+
+    private Player player2;
+
+    private int firstPlayer; // 1:premier joueur à rejoindre, 2:deuxième joueur à rejoindre
+
     private Player tour; // user du tour en cours
 
     private GameState etat;
 
-    @ManyToOne
+    private boolean prolongtation;
+
+    private int numTour;
+
     private Player gagnant;
 
-    private List<List<Integer>> grille;
+    private WinType typeVictoire;
 
-    @ManyToOne
-    private List<Tenaille> tenailles;
+    private int[][] tableau;
+
+    private TreeMap<Integer,Integer> coups;
+
+    private Timer timerPartie;
+
+    private Timer timerTour;
 
 }

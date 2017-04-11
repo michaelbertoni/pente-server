@@ -15,16 +15,26 @@ import java.util.List;
 @Setter
 public class GameDto {
 
-    private Integer tour;
+    private Integer status;
 
-    private GameState etat;
+    private int[][] tableau;
 
-    private Integer gagnant;
+    private Integer nbTenaillesJ1;
 
-    private List<List<Integer>> grille;
+    private Integer nbTenaillesJ2;
 
-    private HashMap<String,Integer> tenailles;
+    private Integer dernierCoupX;
 
-    private long maj;
+    private Integer dernierCoupY;
+
+    private boolean prolongation;
+
+    private boolean finPartie;
+
+    private String detailFinPartie;
+
+    private Integer numTour;
+
+    private Integer code;
 
 }

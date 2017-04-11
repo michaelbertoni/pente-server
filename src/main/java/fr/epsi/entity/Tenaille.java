@@ -12,10 +12,6 @@ import javax.persistence.ManyToOne;
 @Setter
 public class Tenaille {
 
-    @ManyToOne
-    private Game game;
-
-    @ManyToOne
     private Player player;
 
     private Integer score;

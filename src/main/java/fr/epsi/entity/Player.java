@@ -11,19 +11,23 @@ import java.util.HashMap;
 /**
  * Created by micha on 10/04/2017.
  */
-@Entity
 @Getter
 @Setter
 public class Player {
 
-    @Id
-    @GeneratedValue
-    private Integer id;
+    private String id;
 
     private String nom;
 
-    public Player(String nom) {
+    private int nbTenaille;
+
+    public Player(String id, String nom, int nbTenaille) {
+        this.id = id;
         this.nom = nom;
+        this.nbTenaille = nbTenaille;
     }
 
+    public void incrementNbTenaille() {
+        this.nbTenaille++;
+    }
 }
