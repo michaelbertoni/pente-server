@@ -1,19 +1,14 @@
 package fr.epsi.model;
 
-import fr.epsi.entity.GameState;
-import fr.epsi.entity.Player;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.util.HashMap;
-import java.util.List;
 
 /**
  * Created by micha on 10/04/2017.
  */
 @Getter
 @Setter
-public class GameDto {
+public class TurnDto {
 
     private Integer status;
 
