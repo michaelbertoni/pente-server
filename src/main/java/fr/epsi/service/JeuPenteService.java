@@ -5,6 +5,7 @@ import fr.epsi.entity.Etat;
 import fr.epsi.entity.Joueur;
 import fr.epsi.entity.TypeVictoire;
 import fr.epsi.model.ConnectDto;
+import fr.epsi.model.PlayDto;
 import fr.epsi.model.TurnDto;
 import org.springframework.stereotype.Service;
 
@@ -77,7 +78,7 @@ public class JeuPenteService {
             public void run() {
                 jeuPente.setEtat(Etat.FIN);
                 jeuPente.setTypeVictoire(TypeVictoire.TOUR_MANQUE);
-                jeuPente.setGagnant(jeuPente.getJoueur1() == jeuPente.getTour() ? jeuPente.getJoueur1() : jeuPente.getJoueur2());
+                jeuPente.setGagnant(jeuPente.getJoueur1() == jeuPente.getTour() ? jeuPente.getJoueur2() : jeuPente.getJoueur1());
                 jeuPente.getTimerPartie().cancel();
             }
         };
@@ -155,19 +156,24 @@ public class JeuPenteService {
         return dto;
     }
 
-    public Integer placerPion(Integer x, Integer y, String idJoueur) {
+    public PlayDto placerPion(Integer x, Integer y, String idJoueur) {
         JeuPente jeuPente = JeuPente.getInstance();
+        PlayDto dto = new PlayDto();
         if (jeuPente.getJoueur1() == null || jeuPente.getJoueur2() == null) {
-            return 503;
+            dto.setCode(503);
+            return dto;
         }
         if (!(jeuPente.getJoueur1().getId().equals(idJoueur) || jeuPente.getJoueur2().getId().equals(idJoueur))) {
-            return 401;
+            dto.setCode(401);
+            return dto;
         }
         if (!jeuPente.getTour().getId().equals(idJoueur)) {
-            return 401;
+            dto.setCode(401);
+            return dto;
         }
         if (jeuPente.getEtat() != Etat.EN_COURS) {
-            return 401;
+            dto.setCode(401);
+            return dto;
         }
 
         Joueur joueur = jeuPente.getTour();
@@ -176,9 +182,11 @@ public class JeuPenteService {
             jeuPente.incrementerTour();
             jeuPente.getTimerTour().cancel();
             genererTimerDeFinDeTour();
-            return 200;
+            dto.setCode(200);
+            return dto;
         } else {
-            return 406;
+            dto.setCode(406);
+            return dto;
         }
     }
 

@@ -1,6 +1,7 @@
 package fr.epsi.controller;
 
 import fr.epsi.model.ConnectDto;
+import fr.epsi.model.PlayDto;
 import fr.epsi.model.TurnDto;
 import fr.epsi.service.JeuPenteService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,10 +29,10 @@ public class JeuPenteController {
     }
 
     @RequestMapping(value = "/play/{x}/{y}/{idJoueur}", method = RequestMethod.GET)
-    public Integer play(@PathVariable Integer x, @PathVariable Integer y, @PathVariable String idJoueur, HttpServletResponse response) {
-        Integer code = this.jeuPenteService.placerPion(x, y, idJoueur);
-        response.setStatus(code);
-        return code;
+    public PlayDto play(@PathVariable Integer x, @PathVariable Integer y, @PathVariable String idJoueur, HttpServletResponse response) {
+        PlayDto dto = this.jeuPenteService.placerPion(x, y, idJoueur);
+        response.setStatus(dto.getCode());
+        return dto;
     }
 
     @RequestMapping(value = "/turn/{idJoueur}", method = RequestMethod.GET)
