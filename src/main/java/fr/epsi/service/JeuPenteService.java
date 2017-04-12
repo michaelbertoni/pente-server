@@ -127,8 +127,8 @@ public class JeuPenteService {
         dto.setNbTenaillesJ1(jeuPente.getJoueur1().getNbTenaille());
         dto.setNbTenaillesJ2(jeuPente.getJoueur2().getNbTenaille());
         if (!jeuPente.getCoups().isEmpty()) {
-            dto.setDernierCoupX(jeuPente.getCoups().lastEntry().getKey() + 1);
-            dto.setDernierCoupY(jeuPente.getCoups().lastEntry().getValue() + 1);
+            dto.setDernierCoupX(jeuPente.getCoups().lastEntry().getKey());
+            dto.setDernierCoupY(jeuPente.getCoups().lastEntry().getValue());
         }
         dto.setProlongation(jeuPente.isProlongtation());
         dto.setFinPartie(jeuPente.getEtat() == Etat.FIN);
@@ -172,7 +172,7 @@ public class JeuPenteService {
         }
 
         Joueur joueur = jeuPente.getTour();
-        if (miseAjourTableau(x - 1, y - 1, joueur)) {
+        if (miseAjourTableau(x, y, joueur)) {
             jeuPente.setTour(joueur == jeuPente.getJoueur1() ? jeuPente.getJoueur2() : jeuPente.getJoueur1());
             jeuPente.incrementerTour();
             jeuPente.getTimerTour().cancel();
