@@ -67,7 +67,7 @@ public class JeuPenteService {
     private void genererTimerDeFinDeTour() {
         JeuPente jeuPente = JeuPente.getInstance();
         Timer timerTour = new Timer();
-        timerTour.schedule(taskTourManque(), 1000 * 10); // 10 secondes
+        timerTour.schedule(taskTourManque(), 1000 * 10 * 10); // 10 secondes
         jeuPente.setTimerTour(timerTour);
     }
 
@@ -208,7 +208,7 @@ public class JeuPenteService {
         }
 
         // Premier tour ? pion au centre
-        if (jeuPente.getNumTour() == 0 && x != 9 && y != 9) {
+        if (jeuPente.getNumTour() == 0 && !(x == 9 && y == 9)) {
             return false;
         }
 
