@@ -45,7 +45,6 @@ public class JeuPenteService {
 
             // commencer la partie
             jeuPente.setEtat(Etat.EN_COURS);
-            jeuPente.setNumTour(1);
             jeuPente.setTour(jeuPente.getPremierJoueur() == 0 ? jeuPente.getJoueur1() : jeuPente.getJoueur2());
 
             // Timer de fin de tour
@@ -201,12 +200,12 @@ public class JeuPenteService {
         }
 
         // Premier tour ? pion au centre
-        if (jeuPente.getNumTour() == 1 && x != 9 && y != 9) {
+        if (jeuPente.getNumTour() == 0 && x != 9 && y != 9) {
             return false;
         }
 
         // Troisième tour ? pion pas dans le centre 3 * 3
-        if (jeuPente.getNumTour() == 3 && ((x > 6 && x < 12) && (y > 6 && y < 12))) {
+        if (jeuPente.getNumTour() == 2 && ((x > 6 && x < 12) && (y > 6 && y < 12))) {
             return false;
         }
 
