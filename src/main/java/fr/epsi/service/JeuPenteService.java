@@ -10,6 +10,7 @@ import fr.epsi.model.TurnDto;
 import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -47,14 +48,12 @@ public class JeuPenteService {
             // commencer la partie
             jeuPente.setEtat(Etat.EN_COURS);
             jeuPente.setTour(jeuPente.getPremierJoueur() == 0 ? jeuPente.getJoueur1() : jeuPente.getJoueur2());
-
-            // Timer de fin de tour
-            genererTimerDeFinDeTour();
+            genererTimerFinTour();
 
             // Timer de fin de partie
             Timer timerPartie = new Timer();
             timerPartie.schedule(taskMortSubite(), 1000 * 60 * 10); // 10 minutes
-            jeuPente.setTimerPartie(timerPartie);
+            jeuPente.setTimerProlongation(timerPartie);
         }
 
         dto.setCode(200);
@@ -64,11 +63,21 @@ public class JeuPenteService {
         return dto;
     }
 
-    private void genererTimerDeFinDeTour() {
+    public void genererTimerFinTour() {
         JeuPente jeuPente = JeuPente.getInstance();
+        stopTimerFinTour();
         Timer timerTour = new Timer();
         timerTour.schedule(taskTourManque(), 1000 * 10); // 10 secondes
+        System.out.println("Timer de fin de tour : start " + LocalDateTime.now().toString());
         jeuPente.setTimerTour(timerTour);
+    }
+
+    private void stopTimerFinTour() {
+        JeuPente jeuPente = JeuPente.getInstance();
+        if (jeuPente.getTimerTour() != null) {
+            jeuPente.getTimerTour().cancel();
+            System.out.println("Timer de fin de tour : stop " + LocalDateTime.now().toString());
+        }
     }
 
     private TimerTask taskTourManque() {
@@ -76,10 +85,11 @@ public class JeuPenteService {
         return new TimerTask() {
             @Override
             public void run() {
+                System.out.println("Timer de fin de tour : terminé ! " + LocalDateTime.now().toString());
                 jeuPente.setEtat(Etat.FIN);
                 jeuPente.setTypeVictoire(TypeVictoire.TOUR_MANQUE);
                 jeuPente.setGagnant(jeuPente.getJoueur1() == jeuPente.getTour() ? jeuPente.getJoueur2() : jeuPente.getJoueur1());
-                jeuPente.getTimerPartie().cancel();
+                jeuPente.getTimerProlongation().cancel();
             }
         };
     }
@@ -158,64 +168,62 @@ public class JeuPenteService {
 
     public PlayDto placerPion(Integer x, Integer y, String idJoueur) {
         JeuPente jeuPente = JeuPente.getInstance();
-        PlayDto dto = new PlayDto();
+        // joueurs créés ?
         if (jeuPente.getJoueur1() == null || jeuPente.getJoueur2() == null) {
-            dto.setCode(503);
-            return dto;
+            return new PlayDto(503);
         }
+
+        // idJoueur non reconnu
         if (!(jeuPente.getJoueur1().getId().equals(idJoueur) || jeuPente.getJoueur2().getId().equals(idJoueur))) {
-            dto.setCode(401);
-            return dto;
+            return new PlayDto(401);
         }
+
+        // pas le tour du joueur
         if (!jeuPente.getTour().getId().equals(idJoueur)) {
-            dto.setCode(401);
-            return dto;
+            return new PlayDto(401);
         }
+
+        // partie pas en cours
         if (jeuPente.getEtat() != Etat.EN_COURS) {
-            dto.setCode(401);
-            return dto;
+            return new PlayDto(401);
         }
 
-        Joueur joueur = jeuPente.getTour();
-        if (miseAjourTableau(x, y, joueur)) {
-            jeuPente.setTour(joueur == jeuPente.getJoueur1() ? jeuPente.getJoueur2() : jeuPente.getJoueur1());
-            jeuPente.incrementerTour();
-            jeuPente.getTimerTour().cancel();
-            genererTimerDeFinDeTour();
-            dto.setCode(200);
-            return dto;
-        } else {
-            dto.setCode(406);
-            return dto;
-        }
-    }
-
-    private boolean miseAjourTableau(int x, int y, Joueur joueur) {
-        JeuPente jeuPente = JeuPente.getInstance();
         // x hors tableau
         if (x > jeuPente.getTableau().length || x < 0) {
-            return false;
+            return new PlayDto(406);
         }
 
         // y hors tableau
         if (y > jeuPente.getTableau()[x].length || y < 0) {
-            return false;
+            return new PlayDto(406);
         }
 
         // pion déjà présent aux coordonnées x y
         if (jeuPente.getTableau()[x][y] != 0) {
-            return false;
+            return new PlayDto(406);
         }
 
         // Premier tour ? pion au centre
         if (jeuPente.getNumTour() == 0 && !(x == 9 && y == 9)) {
-            return false;
+            return new PlayDto(406);
         }
 
         // Troisième tour ? pion pas dans le centre 3 * 3
         if (jeuPente.getNumTour() == 2 && ((x > 5 && x < 13) && (y > 5 && y < 13))) {
-            return false;
+            return new PlayDto(406);
         }
+
+        stopTimerFinTour();
+
+        Joueur joueur = jeuPente.getTour();
+        miseAjourTableau(x, y, joueur);
+        jeuPente.setTour(joueur == jeuPente.getJoueur1() ? jeuPente.getJoueur2() : jeuPente.getJoueur1());
+        jeuPente.incrementerTour();
+        return new PlayDto(200);
+    }
+
+    private void miseAjourTableau(int x, int y, Joueur joueur) {
+        JeuPente jeuPente = JeuPente.getInstance();
 
         int numPlayer = joueur == jeuPente.getJoueur1() ? 1 : 2;
         jeuPente.getTableau()[x][y] = numPlayer;
@@ -246,12 +254,6 @@ public class JeuPenteService {
             } else {
                 nbPionsDiagonal2Alignes = 0;
             }
-
-            // Pente réalisée ?
-            if (nbPionsHorizontalAlignes == 5 || nbPionsVerticalAlignes == 5 || nbPionsDiagonal1Alignes == 5 || nbPionsDiagonal2Alignes == 5) {
-                endGame(joueur, TypeVictoire.PENTE);
-                break;
-            }
         }
 
         // Vérification tenailles
@@ -268,9 +270,9 @@ public class JeuPenteService {
         }
 
         //// gauche haut
-        int pionGaucheHaut1 = x - 1 >= 0 && x - 1 <= 18 &&  y - 1 >= 0 && y - 1 <= 18 ? jeuPente.getTableau()[x - 1][y - 1] : 0;
-        int pionGaucheHaut2 = x - 2 >= 0 && x - 2 <= 18 &&  y - 2 >= 0 && y - 2 <= 18 ? jeuPente.getTableau()[x - 2][y - 2] : 0;
-        int pionGaucheHaut3 = x - 3 >= 0 && x - 3 <= 18 &&  y - 3 >= 0 && y - 3 <= 18 ? jeuPente.getTableau()[x - 3][y - 3] : 0;
+        int pionGaucheHaut1 = x - 1 >= 0 && x - 1 <= 18 && y - 1 >= 0 && y - 1 <= 18 ? jeuPente.getTableau()[x - 1][y - 1] : 0;
+        int pionGaucheHaut2 = x - 2 >= 0 && x - 2 <= 18 && y - 2 >= 0 && y - 2 <= 18 ? jeuPente.getTableau()[x - 2][y - 2] : 0;
+        int pionGaucheHaut3 = x - 3 >= 0 && x - 3 <= 18 && y - 3 >= 0 && y - 3 <= 18 ? jeuPente.getTableau()[x - 3][y - 3] : 0;
         if (pionGaucheHaut1 == numOtherPlayer && pionGaucheHaut2 == numOtherPlayer && pionGaucheHaut3 == numPlayer) {
             jeuPente.getTableau()[x - 1][y - 1] = 0;
             jeuPente.getTableau()[x - 2][y - 2] = 0;
@@ -288,9 +290,9 @@ public class JeuPenteService {
         }
 
         //// droite haut
-        int pionDroiteHaut1 = x + 1 >= 0 && x + 1 <= 18 &&  y - 1 >= 0 && y - 1 <= 18 ? jeuPente.getTableau()[x + 1][y - 1] : 0;
-        int pionDroiteHaut2 = x + 2 >= 0 && x + 2 <= 18 &&  y - 2 >= 0 && y - 2 <= 18 ? jeuPente.getTableau()[x + 2][y - 2] : 0;
-        int pionDroiteHaut3 = x + 3 >= 0 && x + 3 <= 18 &&  y - 3 >= 0 && y - 3 <= 18 ? jeuPente.getTableau()[x + 3][y - 3] : 0;
+        int pionDroiteHaut1 = x + 1 >= 0 && x + 1 <= 18 && y - 1 >= 0 && y - 1 <= 18 ? jeuPente.getTableau()[x + 1][y - 1] : 0;
+        int pionDroiteHaut2 = x + 2 >= 0 && x + 2 <= 18 && y - 2 >= 0 && y - 2 <= 18 ? jeuPente.getTableau()[x + 2][y - 2] : 0;
+        int pionDroiteHaut3 = x + 3 >= 0 && x + 3 <= 18 && y - 3 >= 0 && y - 3 <= 18 ? jeuPente.getTableau()[x + 3][y - 3] : 0;
         if (pionDroiteHaut1 == numOtherPlayer && pionDroiteHaut2 == numOtherPlayer && pionDroiteHaut3 == numPlayer) {
             jeuPente.getTableau()[x + 1][y - 1] = 0;
             jeuPente.getTableau()[x + 2][y - 2] = 0;
@@ -308,9 +310,9 @@ public class JeuPenteService {
         }
 
         //// droite bas
-        int pionDroiteBas1 = x + 1 >= 0 && x + 1 <= 18 &&  y + 1 >= 0 && y + 1 <= 18 ? jeuPente.getTableau()[x + 1][y + 1] : 0;
-        int pionDroiteBas2 = x + 2 >= 0 && x + 2 <= 18 &&  y + 2 >= 0 && y + 2 <= 18 ? jeuPente.getTableau()[x + 2][y + 2] : 0;
-        int pionDroiteBas3 = x + 3 >= 0 && x + 3 <= 18 &&  y + 3 >= 0 && y + 3 <= 18 ? jeuPente.getTableau()[x + 3][y + 3] : 0;
+        int pionDroiteBas1 = x + 1 >= 0 && x + 1 <= 18 && y + 1 >= 0 && y + 1 <= 18 ? jeuPente.getTableau()[x + 1][y + 1] : 0;
+        int pionDroiteBas2 = x + 2 >= 0 && x + 2 <= 18 && y + 2 >= 0 && y + 2 <= 18 ? jeuPente.getTableau()[x + 2][y + 2] : 0;
+        int pionDroiteBas3 = x + 3 >= 0 && x + 3 <= 18 && y + 3 >= 0 && y + 3 <= 18 ? jeuPente.getTableau()[x + 3][y + 3] : 0;
         if (pionDroiteBas1 == numOtherPlayer && pionDroiteBas2 == numOtherPlayer && pionDroiteBas3 == numPlayer) {
             jeuPente.getTableau()[x + 1][y + 1] = 0;
             jeuPente.getTableau()[x + 2][y + 2] = 0;
@@ -328,9 +330,9 @@ public class JeuPenteService {
         }
 
         //// gauche bas
-        int pionGaucheBas1 = x - 1 >= 0 && x - 1 <= 18 &&  y + 1 >= 0 && y + 1 <= 18 ? jeuPente.getTableau()[x - 1][y + 1] : 0;
-        int pionGaucheBas2 = x - 2 >= 0 && x - 2 <= 18 &&  y + 2 >= 0 && y + 2 <= 18 ? jeuPente.getTableau()[x - 2][y + 2] : 0;
-        int pionGaucheBas3 = x - 3 >= 0 && x - 3 <= 18 &&  y + 3 >= 0 && y + 3 <= 18 ? jeuPente.getTableau()[x - 3][y + 3] : 0;
+        int pionGaucheBas1 = x - 1 >= 0 && x - 1 <= 18 && y + 1 >= 0 && y + 1 <= 18 ? jeuPente.getTableau()[x - 1][y + 1] : 0;
+        int pionGaucheBas2 = x - 2 >= 0 && x - 2 <= 18 && y + 2 >= 0 && y + 2 <= 18 ? jeuPente.getTableau()[x - 2][y + 2] : 0;
+        int pionGaucheBas3 = x - 3 >= 0 && x - 3 <= 18 && y + 3 >= 0 && y + 3 <= 18 ? jeuPente.getTableau()[x - 3][y + 3] : 0;
         if (pionGaucheBas1 == numOtherPlayer && pionGaucheBas2 == numOtherPlayer && pionGaucheBas3 == numPlayer) {
             jeuPente.getTableau()[x - 1][y + 1] = 0;
             jeuPente.getTableau()[x - 2][y + 2] = 0;
@@ -339,20 +341,24 @@ public class JeuPenteService {
 
         joueur.setNbTenaille(joueur.getNbTenaille() + nbTenaillesRealisees);
 
+        // Pente réalisée ?
+        if (nbPionsHorizontalAlignes == 5 || nbPionsVerticalAlignes == 5 || nbPionsDiagonal1Alignes == 5 || nbPionsDiagonal2Alignes == 5) {
+            endGame(joueur, TypeVictoire.PENTE);
+        }
+
+        // Conditions victoire tenailles
         if (joueur.getNbTenaille() > 4 || (jeuPente.isProlongtation() && nbTenaillesRealisees > 0)) {
             endGame(joueur, TypeVictoire.TENAILLE);
         }
 
         // Ajout du coup dans l'historique
         jeuPente.getCoups().put(x, y);
-
-        return true;
     }
 
     private void endGame(Joueur joueur, TypeVictoire typeVictoire) {
         JeuPente jeuPente = JeuPente.getInstance();
-        jeuPente.getTimerTour().cancel();
-        jeuPente.getTimerPartie().cancel();
+        stopTimerFinTour();
+        jeuPente.getTimerProlongation().cancel();
         jeuPente.setGagnant(joueur);
         jeuPente.setEtat(Etat.FIN);
         jeuPente.setTypeVictoire(typeVictoire);

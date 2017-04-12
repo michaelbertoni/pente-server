@@ -2,12 +2,14 @@ package fr.epsi.model;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 /**
  * Created by micha on 10/04/2017.
  */
 @Getter
 @Setter
+@ToString
 public class TurnDto {
 
     private Integer status;

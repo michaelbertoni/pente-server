@@ -50,7 +50,7 @@ public class JeuPente {
 
     private TreeMap<Integer,Integer> coups;
 
-    private Timer timerPartie;
+    private Timer timerProlongation;
 
     private Timer timerTour;
 

@@ -1,5 +1,6 @@
 package fr.epsi.controller;
 
+import fr.epsi.entity.JeuPente;
 import fr.epsi.model.ConnectDto;
 import fr.epsi.model.PlayDto;
 import fr.epsi.model.TurnDto;
@@ -22,6 +23,7 @@ public class JeuPenteController {
     @RequestMapping(value = "/connect/{joueurName}", method = RequestMethod.GET)
     public ConnectDto connect(@PathVariable String joueurName, HttpServletResponse response) {
         ConnectDto dto = this.jeuPenteService.connecterJoueur(joueurName);
+        System.out.println(dto.toString());
         response.setStatus(dto.getCode());
         return dto;
     }
@@ -30,7 +32,11 @@ public class JeuPenteController {
     @RequestMapping(value = "/play/{x}/{y}/{idJoueur}", method = RequestMethod.GET)
     public PlayDto play(@PathVariable Integer x, @PathVariable Integer y, @PathVariable String idJoueur, HttpServletResponse response) {
         PlayDto dto = this.jeuPenteService.placerPion(x, y, idJoueur);
+        System.out.println(dto.toString());
         response.setStatus(dto.getCode());
+        if (dto.getCode() == 200) {
+            this.jeuPenteService.genererTimerFinTour();
+        }
         return dto;
     }
 
@@ -38,6 +44,7 @@ public class JeuPenteController {
     @RequestMapping(value = "/turn/{idJoueur}", method = RequestMethod.GET)
     public TurnDto turn(@PathVariable String idJoueur, HttpServletResponse response) {
         TurnDto dto = this.jeuPenteService.statusPartieEnCours(idJoueur);
+        System.out.println(dto.toString());
         response.setStatus(dto.getCode());
         return dto;
     }
