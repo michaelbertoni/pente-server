@@ -213,7 +213,7 @@ public class JeuPenteService {
         }
 
         // Troisième tour ? pion pas dans le centre 3 * 3
-        if (jeuPente.getNumTour() == 2 && ((x > 5 && x < 11) && (y > 5 && y < 11))) {
+        if (jeuPente.getNumTour() == 2 && ((x > 5 && x < 13) && (y > 5 && y < 13))) {
             return false;
         }
 
