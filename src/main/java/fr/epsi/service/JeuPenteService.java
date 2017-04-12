@@ -67,7 +67,7 @@ public class JeuPenteService {
     private void genererTimerDeFinDeTour() {
         JeuPente jeuPente = JeuPente.getInstance();
         Timer timerTour = new Timer();
-        timerTour.schedule(taskTourManque(), 1000 * 10 * 10); // 10 secondes
+        timerTour.schedule(taskTourManque(), 1000 * 10); // 10 secondes
         jeuPente.setTimerTour(timerTour);
     }
 
@@ -226,22 +226,22 @@ public class JeuPenteService {
         int nbPionsDiagonal1Alignes = 0;
         int nbPionsDiagonal2Alignes = 0;
         for (int i = -4; i < 5; i++) {
-            if (jeuPente.getTableau()[x + i][y] == numPlayer) {
+            if (x + i >= 0 && x + i <= 18 && jeuPente.getTableau()[x + i][y] == numPlayer) {
                 nbPionsHorizontalAlignes++;
             } else {
                 nbPionsHorizontalAlignes = 0;
             }
-            if (jeuPente.getTableau()[x][y + i] == numPlayer) {
+            if (y + i >= 0 && y + i <= 18 && jeuPente.getTableau()[x][y + i] == numPlayer) {
                 nbPionsVerticalAlignes++;
             } else {
                 nbPionsVerticalAlignes = 0;
             }
-            if (jeuPente.getTableau()[x + i][y + i] == numPlayer) {
+            if (x + i >= 0 && x + i <= 18 && y + i >= 0 && y + i <= 18 && jeuPente.getTableau()[x + i][y + i] == numPlayer) {
                 nbPionsDiagonal1Alignes++;
             } else {
                 nbPionsDiagonal1Alignes = 0;
             }
-            if (jeuPente.getTableau()[x + i][y - i] == numPlayer) {
+            if (x + i >= 0 && x + i <= 18 && y - i >= 0 && y - i <= 18 && jeuPente.getTableau()[x + i][y - i] == numPlayer) {
                 nbPionsDiagonal2Alignes++;
             } else {
                 nbPionsDiagonal2Alignes = 0;
@@ -258,65 +258,65 @@ public class JeuPenteService {
         int numOtherPlayer = numPlayer == 1 ? 2 : 1;
         int nbTenaillesRealisees = 0;
         //// gauche
-        int pionGauche1 = jeuPente.getTableau()[x - 1][y];
-        int pionGauche2 = jeuPente.getTableau()[x - 2][y];
-        int pionGauche3 = jeuPente.getTableau()[x - 3][y];
+        int pionGauche1 = x - 1 >= 0 && x - 1 <= 18 ? jeuPente.getTableau()[x - 1][y] : 0;
+        int pionGauche2 = x - 2 >= 0 && x - 2 <= 18 ? jeuPente.getTableau()[x - 2][y] : 0;
+        int pionGauche3 = x - 3 >= 0 && x - 3 <= 18 ? jeuPente.getTableau()[x - 3][y] : 0;
         if (pionGauche1 == numOtherPlayer && pionGauche2 == numOtherPlayer && pionGauche3 == numPlayer) {
             nbTenaillesRealisees++;
         }
 
         //// gauche haut
-        int pionGaucheHaut1 = jeuPente.getTableau()[x - 1][y - 1];
-        int pionGaucheHaut2 = jeuPente.getTableau()[x - 2][y - 2];
-        int pionGaucheHaut3 = jeuPente.getTableau()[x - 3][y - 3];
+        int pionGaucheHaut1 = x - 1 >= 0 && x - 1 <= 18 &&  y - 1 >= 0 && y - 1 <= 18 ? jeuPente.getTableau()[x - 1][y - 1] : 0;
+        int pionGaucheHaut2 = x - 2 >= 0 && x - 2 <= 18 &&  y - 2 >= 0 && y - 2 <= 18 ? jeuPente.getTableau()[x - 2][y - 2] : 0;
+        int pionGaucheHaut3 = x - 3 >= 0 && x - 3 <= 18 &&  y - 3 >= 0 && y - 3 <= 18 ? jeuPente.getTableau()[x - 3][y - 3] : 0;
         if (pionGaucheHaut1 == numOtherPlayer && pionGaucheHaut2 == numOtherPlayer && pionGaucheHaut3 == numPlayer) {
             nbTenaillesRealisees++;
         }
 
         //// haut
-        int pionHaut1 = jeuPente.getTableau()[x][y - 1];
-        int pionHaut2 = jeuPente.getTableau()[x][y - 2];
-        int pionHaut3 = jeuPente.getTableau()[x][y - 3];
+        int pionHaut1 = y - 1 >= 0 && y - 1 <= 18 ? jeuPente.getTableau()[x][y - 1] : 0;
+        int pionHaut2 = y - 2 >= 0 && y - 2 <= 18 ? jeuPente.getTableau()[x][y - 2] : 0;
+        int pionHaut3 = y - 3 >= 0 && y - 3 <= 18 ? jeuPente.getTableau()[x][y - 3] : 0;
         if (pionHaut1 == numOtherPlayer && pionHaut2 == numOtherPlayer && pionHaut3 == numPlayer) {
             nbTenaillesRealisees++;
         }
 
         //// droite haut
-        int pionDroiteHaut1 = jeuPente.getTableau()[x + 1][y - 1];
-        int pionDroiteHaut2 = jeuPente.getTableau()[x + 2][y - 2];
-        int pionDroiteHaut3 = jeuPente.getTableau()[x + 3][y - 3];
+        int pionDroiteHaut1 = x + 1 >= 0 && x + 1 <= 18 &&  y - 1 >= 0 && y - 1 <= 18 ? jeuPente.getTableau()[x + 1][y - 1] : 0;
+        int pionDroiteHaut2 = x + 2 >= 0 && x + 2 <= 18 &&  y - 2 >= 0 && y - 2 <= 18 ? jeuPente.getTableau()[x + 2][y - 2] : 0;
+        int pionDroiteHaut3 = x + 3 >= 0 && x + 3 <= 18 &&  y - 3 >= 0 && y - 3 <= 18 ? jeuPente.getTableau()[x + 3][y - 3] : 0;
         if (pionDroiteHaut1 == numOtherPlayer && pionDroiteHaut2 == numOtherPlayer && pionDroiteHaut3 == numPlayer) {
             nbTenaillesRealisees++;
         }
 
         //// droite
-        int pionDroite1 = jeuPente.getTableau()[x + 1][y];
-        int pionDroite2 = jeuPente.getTableau()[x + 2][y];
-        int pionDroite3 = jeuPente.getTableau()[x + 3][y];
+        int pionDroite1 = x + 1 >= 0 && x + 1 <= 18 ? jeuPente.getTableau()[x + 1][y] : 0;
+        int pionDroite2 = x + 2 >= 0 && x + 2 <= 18 ? jeuPente.getTableau()[x + 2][y] : 0;
+        int pionDroite3 = x + 3 >= 0 && x + 3 <= 18 ? jeuPente.getTableau()[x + 3][y] : 0;
         if (pionDroite1 == numOtherPlayer && pionDroite2 == numOtherPlayer && pionDroite3 == numPlayer) {
             nbTenaillesRealisees++;
         }
 
         //// droite bas
-        int pionDroiteBas1 = jeuPente.getTableau()[x + 1][y + 1];
-        int pionDroiteBas2 = jeuPente.getTableau()[x + 2][y + 2];
-        int pionDroiteBas3 = jeuPente.getTableau()[x + 3][y + 3];
+        int pionDroiteBas1 = x + 1 >= 0 && x + 1 <= 18 &&  y + 1 >= 0 && y + 1 <= 18 ? jeuPente.getTableau()[x + 1][y + 1] : 0;
+        int pionDroiteBas2 = x + 2 >= 0 && x + 2 <= 18 &&  y + 2 >= 0 && y + 2 <= 18 ? jeuPente.getTableau()[x + 2][y + 2] : 0;
+        int pionDroiteBas3 = x + 3 >= 0 && x + 3 <= 18 &&  y + 3 >= 0 && y + 3 <= 18 ? jeuPente.getTableau()[x + 3][y + 3] : 0;
         if (pionDroiteBas1 == numOtherPlayer && pionDroiteBas2 == numOtherPlayer && pionDroiteBas3 == numPlayer) {
             nbTenaillesRealisees++;
         }
 
         //// bas
-        int pionBas1 = jeuPente.getTableau()[x][y + 1];
-        int pionBas2 = jeuPente.getTableau()[x][y + 2];
-        int pionBas3 = jeuPente.getTableau()[x][y + 3];
+        int pionBas1 = y + 1 >= 0 && y + 1 <= 18 ? jeuPente.getTableau()[x][y + 1] : 0;
+        int pionBas2 = y + 2 >= 0 && y + 2 <= 18 ? jeuPente.getTableau()[x][y + 2] : 0;
+        int pionBas3 = y + 3 >= 0 && y + 3 <= 18 ? jeuPente.getTableau()[x][y + 3] : 0;
         if (pionBas1 == numOtherPlayer && pionBas2 == numOtherPlayer && pionBas3 == numPlayer) {
             nbTenaillesRealisees++;
         }
 
         //// gauche bas
-        int pionGaucheBas1 = jeuPente.getTableau()[x - 1][y + 1];
-        int pionGaucheBas2 = jeuPente.getTableau()[x - 2][y + 2];
-        int pionGaucheBas3 = jeuPente.getTableau()[x - 3][y + 3];
+        int pionGaucheBas1 = x - 1 >= 0 && x - 1 <= 18 &&  y + 1 >= 0 && y + 1 <= 18 ? jeuPente.getTableau()[x - 1][y + 1] : 0;
+        int pionGaucheBas2 = x - 2 >= 0 && x - 2 <= 18 &&  y + 2 >= 0 && y + 2 <= 18 ? jeuPente.getTableau()[x - 2][y + 2] : 0;
+        int pionGaucheBas3 = x - 3 >= 0 && x - 3 <= 18 &&  y + 3 >= 0 && y + 3 <= 18 ? jeuPente.getTableau()[x - 3][y + 3] : 0;
         if (pionGaucheBas1 == numOtherPlayer && pionGaucheBas2 == numOtherPlayer && pionGaucheBas3 == numPlayer) {
             nbTenaillesRealisees++;
         }
