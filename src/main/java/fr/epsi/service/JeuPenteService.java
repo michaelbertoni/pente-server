@@ -234,25 +234,38 @@ public class JeuPenteService {
         int nbPionsDiagonal1Alignes = 0;
         int nbPionsDiagonal2Alignes = 0;
         for (int i = -4; i < 5; i++) {
-            if (x + i >= 0 && x + i <= 18 && jeuPente.getTableau()[x + i][y] == numPlayer) {
-                nbPionsHorizontalAlignes++;
-            } else {
-                nbPionsHorizontalAlignes = 0;
+            if (x + i >= 0 && x + i <= 18) {
+                if (jeuPente.getTableau()[x + i][y] == numPlayer) {
+                    nbPionsHorizontalAlignes++;
+                } else {
+                    nbPionsHorizontalAlignes = 0;
+                }
             }
-            if (y + i >= 0 && y + i <= 18 && jeuPente.getTableau()[x][y + i] == numPlayer) {
-                nbPionsVerticalAlignes++;
-            } else {
-                nbPionsVerticalAlignes = 0;
+            if (y + i >= 0 && y + i <= 18) {
+                if (jeuPente.getTableau()[x][y + i] == numPlayer) {
+                    nbPionsVerticalAlignes++;
+                } else {
+                    nbPionsVerticalAlignes = 0;
+                }
             }
-            if (x + i >= 0 && x + i <= 18 && y + i >= 0 && y + i <= 18 && jeuPente.getTableau()[x + i][y + i] == numPlayer) {
-                nbPionsDiagonal1Alignes++;
-            } else {
-                nbPionsDiagonal1Alignes = 0;
+            if (x + i >= 0 && x + i <= 18 && y + i >= 0 && y + i <= 18) {
+                if (jeuPente.getTableau()[x + i][y + i] == numPlayer) {
+                    nbPionsDiagonal1Alignes++;
+                } else {
+                    nbPionsDiagonal1Alignes = 0;
+                }
             }
-            if (x + i >= 0 && x + i <= 18 && y - i >= 0 && y - i <= 18 && jeuPente.getTableau()[x + i][y - i] == numPlayer) {
-                nbPionsDiagonal2Alignes++;
-            } else {
-                nbPionsDiagonal2Alignes = 0;
+            if (x + i >= 0 && x + i <= 18 && y - i >= 0 && y - i <= 18) {
+                if (jeuPente.getTableau()[x + i][y - i] == numPlayer) {
+                    nbPionsDiagonal2Alignes++;
+                } else {
+                    nbPionsDiagonal2Alignes = 0;
+                }
+            }
+
+            // Pente réalisée ?
+            if (nbPionsHorizontalAlignes == 5 || nbPionsVerticalAlignes == 5 || nbPionsDiagonal1Alignes == 5 || nbPionsDiagonal2Alignes == 5) {
+                endGame(joueur, TypeVictoire.PENTE);
             }
         }
 
@@ -340,11 +353,6 @@ public class JeuPenteService {
         }
 
         joueur.setNbTenaille(joueur.getNbTenaille() + nbTenaillesRealisees);
-
-        // Pente réalisée ?
-        if (nbPionsHorizontalAlignes == 5 || nbPionsVerticalAlignes == 5 || nbPionsDiagonal1Alignes == 5 || nbPionsDiagonal2Alignes == 5) {
-            endGame(joueur, TypeVictoire.PENTE);
-        }
 
         // Conditions victoire tenailles
         if (joueur.getNbTenaille() > 4 || (jeuPente.isProlongtation() && nbTenaillesRealisees > 0)) {
