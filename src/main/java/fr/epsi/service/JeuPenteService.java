@@ -67,7 +67,7 @@ public class JeuPenteService {
         JeuPente jeuPente = JeuPente.getInstance();
         stopTimerFinTour();
         Timer timerTour = new Timer();
-        timerTour.schedule(taskTourManque(), 1000 * 12); // 10 secondes
+        timerTour.schedule(taskTourManque(), 1000 * 12); // 12 secondes
         System.out.println("Timer de fin de tour : start " + LocalDateTime.now().toString());
         jeuPente.setTimerTour(timerTour);
     }
