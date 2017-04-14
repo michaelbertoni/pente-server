@@ -1,6 +1,5 @@
 package fr.epsi.controller;
 
-import fr.epsi.entity.JeuPente;
 import fr.epsi.model.ConnectDto;
 import fr.epsi.model.PlayDto;
 import fr.epsi.model.TurnDto;
@@ -11,7 +10,11 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletResponse;
 
 /**
- * Created by micha on 11/04/2017.
+ * Created by michael on 11/04/2017.
+ */
+
+/**
+ * Point d'entrée de l'API du jeu de pente
  */
 @RestController
 public class JeuPenteController {
@@ -19,6 +22,12 @@ public class JeuPenteController {
     @Autowired
     private JeuPenteService jeuPenteService;
 
+    /**
+     * Route pour la méthode de connexion à la partie
+     * @param joueurName : nom du joueur
+     * @param response
+     * @return
+     */
     @CrossOrigin
     @RequestMapping(value = "/connect/{joueurName}", method = RequestMethod.GET)
     public ConnectDto connect(@PathVariable String joueurName, HttpServletResponse response) {
@@ -28,6 +37,14 @@ public class JeuPenteController {
         return dto;
     }
 
+    /**
+     * Route pour la méthode de placement d'un pion sur le plateau de jeu
+     * @param x : localisation horizontale du pion
+     * @param y : localisation verticale du pion
+     * @param idJoueur : id du joueur généré par le serveur à la connexion
+     * @param response
+     * @return
+     */
     @CrossOrigin
     @RequestMapping(value = "/play/{x}/{y}/{idJoueur}", method = RequestMethod.GET)
     public PlayDto play(@PathVariable Integer x, @PathVariable Integer y, @PathVariable String idJoueur, HttpServletResponse response) {
@@ -40,10 +57,16 @@ public class JeuPenteController {
         return dto;
     }
 
+    /**
+     * Route pour la méthode de récupération du statut de la partie
+     * @param idJoueur : id du joueur généré par le serveur à la connexion
+     * @param response
+     * @return
+     */
     @CrossOrigin
     @RequestMapping(value = "/turn/{idJoueur}", method = RequestMethod.GET)
     public TurnDto turn(@PathVariable String idJoueur, HttpServletResponse response) {
-        TurnDto dto = this.jeuPenteService.statusPartieEnCours(idJoueur);
+        TurnDto dto = this.jeuPenteService.statutPartieEnCours(idJoueur);
         System.out.println(dto.toString());
         response.setStatus(dto.getCode());
         return dto;

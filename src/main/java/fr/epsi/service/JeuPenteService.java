@@ -20,27 +20,38 @@ import java.util.concurrent.ThreadLocalRandom;
 @Service
 public class JeuPenteService {
 
+    // générateur d'id aléatoire
     private static SecureRandom random = new SecureRandom();
 
+    /**
+     * Connecter un joueur à la partie
+     * @param nomJoueur
+     * @return
+     */
     public ConnectDto connecterJoueur(String nomJoueur) {
         JeuPente jeuPente = JeuPente.getInstance();
+        // Création de l'objet de réponse
         ConnectDto dto = new ConnectDto();
         // Si la partie est terminée et qu'un joueur se connecte, démarrer une nouvelle partie
         if (jeuPente.getEtat() == Etat.FIN) {
             resetGame();
         }
 
+        // si le serveur est plein, renvoyer une erreur 401
         if (jeuPente.getJoueur1() != null && jeuPente.getJoueur2() != null) {
             dto.setCode(401);
             return dto;
         }
 
         Joueur newJoueur = null;
+        // connexion du premier joueur
         if (jeuPente.getJoueur1() == null) {
             newJoueur = new Joueur(genererIdJoueur(), nomJoueur, 0);
             jeuPente.setJoueur1(newJoueur);
             dto.setNumJoueur(1);
-        } else if (jeuPente.getJoueur2() == null) {
+        }
+        // connexion du deuxième joueur
+        else if (jeuPente.getJoueur2() == null) {
             newJoueur = new Joueur(genererIdJoueur(), nomJoueur, 0);
             jeuPente.setJoueur2(newJoueur);
             dto.setNumJoueur(2);
@@ -56,6 +67,7 @@ public class JeuPenteService {
             jeuPente.setTimerProlongation(timerPartie);
         }
 
+        // complétion de l'objet de réponse
         dto.setCode(200);
         dto.setIdJoueur(newJoueur.getId());
         dto.setNomJoueur(newJoueur.getNom());
@@ -63,6 +75,9 @@ public class JeuPenteService {
         return dto;
     }
 
+    /**
+     * Arrête et redémarre le timer de fin de tour
+     */
     public void genererTimerFinTour() {
         JeuPente jeuPente = JeuPente.getInstance();
         stopTimerFinTour();
@@ -72,6 +87,9 @@ public class JeuPenteService {
         jeuPente.setTimerTour(timerTour);
     }
 
+    /**
+     * Arrête de le timer de fin de tour
+     */
     private void stopTimerFinTour() {
         JeuPente jeuPente = JeuPente.getInstance();
         if (jeuPente.getTimerTour() != null) {
@@ -80,6 +98,10 @@ public class JeuPenteService {
         }
     }
 
+    /**
+     * Action exécutée à la fin du timer de fin de tour : partie terminée et le joueur qui n'a pas joué dans les temps perd
+     * @return
+     */
     private TimerTask taskTourManque() {
         JeuPente jeuPente = JeuPente.getInstance();
         return new TimerTask() {
@@ -94,6 +116,10 @@ public class JeuPenteService {
         };
     }
 
+    /**
+     * Action exécutée à la fin du timer de prolongation : le jeu passe en prolongation (le 1e joueur à faire une pente ou une tenaille gagne)
+     * @return
+     */
     private TimerTask taskMortSubite() {
         JeuPente jeuPente = JeuPente.getInstance();
         return new TimerTask() {
@@ -104,6 +130,9 @@ public class JeuPenteService {
         };
     }
 
+    /**
+     * Remise à zéro de la partie
+     */
     private void resetGame() {
         JeuPente jeuPente = JeuPente.getInstance();
         jeuPente.setPremierJoueur(ThreadLocalRandom.current().nextInt(0, 2));
@@ -119,13 +148,21 @@ public class JeuPenteService {
         jeuPente.setCoups(new TreeMap<>());
     }
 
-    public TurnDto statusPartieEnCours(String idJoueur) {
+    /**
+     * Récupération du statut de la partie en cours
+     * @param idJoueur
+     * @return
+     */
+    public TurnDto statutPartieEnCours(String idJoueur) {
         JeuPente jeuPente = JeuPente.getInstance();
         TurnDto dto = new TurnDto();
+        // si un joueur n'est pas connecté, renvoie du code 503
         if (jeuPente.getJoueur1() == null || jeuPente.getJoueur2() == null) {
             dto.setCode(503);
             return dto;
         }
+
+        // si l'idJoueur ne correspond à l'id d'aucun des joueurs connectés, renvoie du code 401
         if (jeuPente.getJoueur1().getId().equals(idJoueur) && jeuPente.getJoueur2().getId().equals(idJoueur)) {
             dto.setCode(401);
             return dto;
@@ -136,6 +173,7 @@ public class JeuPenteService {
         dto.setTableau(jeuPente.getTableau());
         dto.setNbTenaillesJ1(jeuPente.getJoueur1().getNbTenaille());
         dto.setNbTenaillesJ2(jeuPente.getJoueur2().getNbTenaille());
+        // on ne renseigne dernierCoupX et dernierCoupY que si un coup a déjà été joué
         if (!jeuPente.getCoups().isEmpty()) {
             dto.setDernierCoupX(jeuPente.getCoups().lastEntry().getKey());
             dto.setDernierCoupY(jeuPente.getCoups().lastEntry().getValue());
@@ -143,6 +181,7 @@ public class JeuPenteService {
         dto.setProlongation(jeuPente.isProlongtation());
         dto.setFinPartie(jeuPente.getEtat() == Etat.FIN);
 
+        // détéction fin de partie
         if (dto.isFinPartie()) {
             if (jeuPente.getTypeVictoire() == TypeVictoire.TENAILLE) {
                 if (jeuPente.isProlongtation()) {
@@ -166,6 +205,13 @@ public class JeuPenteService {
         return dto;
     }
 
+    /**
+     * Placer un pion pour le joueur correspondant à idJoueur
+     * @param x
+     * @param y
+     * @param idJoueur
+     * @return
+     */
     public PlayDto placerPion(Integer x, Integer y, String idJoueur) {
         JeuPente jeuPente = JeuPente.getInstance();
         // joueurs créés ?
@@ -213,22 +259,31 @@ public class JeuPenteService {
             return new PlayDto(406);
         }
 
+        // le pion est valide, on arrête le timer de fin de tour
         stopTimerFinTour();
 
         Joueur joueur = jeuPente.getTour();
         miseAjourTableau(x, y, joueur);
+        // changement de tour
         jeuPente.setTour(joueur == jeuPente.getJoueur1() ? jeuPente.getJoueur2() : jeuPente.getJoueur1());
         jeuPente.incrementerTour();
+
         return new PlayDto(200);
     }
 
+    /**
+     * méthode de vérification des pentes et des tenailles
+     * @param x
+     * @param y
+     * @param joueur
+     */
     private void miseAjourTableau(int x, int y, Joueur joueur) {
         JeuPente jeuPente = JeuPente.getInstance();
 
         int numPlayer = joueur == jeuPente.getJoueur1() ? 1 : 2;
         jeuPente.getTableau()[x][y] = numPlayer;
 
-        // Vérification pente
+        // Vérification pente - - - - xy - - - - avec xy le pion posé, i permet de vérifier les cases de parts à d'autres du pion posé
         int nbPionsHorizontalAlignes = 0;
         int nbPionsVerticalAlignes = 0;
         int nbPionsDiagonal1Alignes = 0;
@@ -363,6 +418,11 @@ public class JeuPenteService {
         jeuPente.getCoups().put(x, y);
     }
 
+    /**
+     * Finir la partie avec un type de victoire
+     * @param joueur
+     * @param typeVictoire
+     */
     private void endGame(Joueur joueur, TypeVictoire typeVictoire) {
         JeuPente jeuPente = JeuPente.getInstance();
         stopTimerFinTour();
@@ -372,6 +432,10 @@ public class JeuPenteService {
         jeuPente.setTypeVictoire(typeVictoire);
     }
 
+    /**
+     * Générer un id de joueur
+     * @return
+     */
     private String genererIdJoueur() {
         char[] CHARSET_AZ_09 = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".toCharArray();
         char[] charResult = new char[8];
