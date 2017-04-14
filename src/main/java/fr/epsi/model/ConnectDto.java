@@ -7,6 +7,10 @@ import lombok.ToString;
 /**
  * Created by micha on 11/04/2017.
  */
+
+/**
+ * Objet retourné pour la requête /connect/{nomJoueur}
+ */
 @Getter
 @Setter
 @ToString

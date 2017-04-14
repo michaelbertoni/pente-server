@@ -10,6 +10,10 @@ import java.util.concurrent.ThreadLocalRandom;
 /**
  * Created by micha on 10/04/2017.
  */
+
+/**
+ * Singleton de la partie de pente
+ */
 @Getter
 @Setter
 public class JeuPente {
@@ -40,7 +44,7 @@ public class JeuPente {
 
     private boolean prolongtation;
 
-    private int numTour;
+    private int numTour; // compteur de tour
 
     private Joueur gagnant;
 
@@ -48,7 +52,7 @@ public class JeuPente {
 
     private int[][] tableau;
 
-    private TreeMap<Integer,Integer> coups;
+    private TreeMap<Integer,Integer> coups; // historique des coups joués
 
     private Timer timerProlongation;
 

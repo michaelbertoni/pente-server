@@ -7,6 +7,10 @@ import lombok.ToString;
 /**
  * Created by micha on 10/04/2017.
  */
+
+/**
+ * Objet retourné pour la requête /turn/{idJoueur}
+ */
 @Getter
 @Setter
 @ToString
